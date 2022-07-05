@@ -188,24 +188,92 @@ import { useEffect, useState } from 'react'
 import { useRouter, withRouter } from 'next/router'
 import axios, { AxiosResponse } from 'axios'
 
+interface ListaProps{
+  apiKey: any
+}
 
 
-const Lista:NextComponentType = () => {
+const Lista: React.FC<ListaProps> = (props:ListaProps) => {
+
+const [novoFilme, setNovoFilme] = useState<string>("")
+const [procurando, setProcurando] = useState<boolean>(false)
+
+let id = 10
+
+const deleteLista = (id:number)=>{
+console.log('oi')
+
+}
+
+const procuraFilme = () =>{
+
+
+  function procurar () {
+    axios.get(`https://api.themoviedb.org/3/search/movie?api_key=${props.apiKey}&query=${novoFilme}`).then((res)=>{
+      if (res.data.total_results ===0){
+        return alert('não tem nada aqui com esse titulo')
+      }
+      else{
+        console.log(res.data.results)
+      }
+    })
+  }
+
+  if(novoFilme !== ""){
+    procurar()
+  }
+  return
+}
+
 return(
-    <div>Lista1</div>
+    <div className='bg-indigo-100'><h1>Lista tal</h1>
+    <input className='bg-gray-100 rounded p-2' type={"button"} value="delete" onClick={()=>deleteLista(id)} />
+    {/* isso aqui é um mockup pra um componente que ainda vai vir, que é o ItemDaLista, que vai ser feito no ternario */}
+    <p>id</p>
+    <Image src={`/search/movie?api_key=${props.apiKey}&query=${novoFilme}/wuMc08IPKEatf9rnMNXvIDxqP4W.jpg`} alt="Vercel Logo" width={72} height={16} />
+    <p>poster</p>
+    <p>apikey {props.apiKey}</p>
+    <p>Lorem, ipsum.</p>
+    <p>Lorem, ipsum.</p>
+    <p>Lorem, ipsum.</p>
+    <p>Lorem, ipsum.</p>
+    {/* isso aqui é um mockup pra um componente que ainda vai vir, que é o ItemDaLista */}
+    <input type={"text"} placeholder="Adicione um filme"  onChange={(e)=>setNovoFilme(e.target.value)}/>
+    <input className='bg-gray-100 rounded p-2' type={"button"} value="procurar" onClick={()=>procuraFilme()} />
+    </div>
 )
 }
 
 const Dashboard: NextPage = () => {
     
+
+
+
     const [novoNomeLista, setNovoNomeLista] = useState<string>("")
     const [novoDescricao, setNovoDescricao] = useState<string>("")
-    const [listaId, setListaId] = useState<number>()
-
+    const [arrListaId, setArrListaId] = useState<number[]>()
+    const [hasList, setHasList] = useState<boolean>(false)
     
 
     const router = useRouter()
     const user = router.query.user
+    const apiKey = router.query.apiKey
+    const sessionId = router.query.sessionId
+
+    useEffect(()=>{
+      axios.get(`https://api.themoviedb.org/3/account/{account_id}/lists?api_key=${apiKey}&language=en-US`,{
+        params:{
+          api_key: apiKey,
+          session_id: sessionId
+        }
+        }).then((res)=>{
+          if(res.data.results){
+            setHasList(true)
+            setArrListaId(res.data.results.map((r:any)=>r.id))
+          }
+          console.log(res.data.results.map((r:any)=>r.id), 'res do useEff')
+        })
+    },[])
 
 
     
@@ -220,10 +288,11 @@ const criaLista = () =>{
     console.log('crialista', router.query.sessionId, "session id")
 
 
-    if(!novoDescricao && !novoNomeLista){
+    if(!novoDescricao || !novoNomeLista){
         return alert('Preencha os campos corretamente')
     }
     function postList () {
+        setHasList(true)
         axios.post(`https://api.themoviedb.org/3/list?api_key=${router.query.apiKey}&session_id=${router.query.sessionId}`,{
             name: novoNomeLista,
             description: novoDescricao,
@@ -234,7 +303,7 @@ const criaLista = () =>{
             }
             else if (res.data.list_id){
                 console.log(res.data, 'resdata')
-                setListaId(res.data.list_id)
+                
             }
         })
     }
@@ -249,22 +318,27 @@ const criaLista = () =>{
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
+      <main className='flex flex-col items-center'>
+        
+        <h1 className='flex text-5xl p-10 '>
           Bem vindo {user}
         </h1>
-        <h3>Crie agora sua primeira lista</h3>
-        <input type={'text'} placeholder="Nome da sua lista" onChange={(e)=> setNovoNomeLista(e.target.value)} />
-        <input type={'text'} placeholder="Descrição" onChange={(e)=> setNovoDescricao(e.target.value)} />
-        <input type={'button'} value="Criar" onClick={()=>criaLista()} />
+        <section className="flex flex-col p-10 bg-indigo-100">
 
+        <h3 className='text-2xl'>Crie uma lista</h3>
+        <input className='mb-1' type={'text'} placeholder="Nome da sua lista" onChange={(e)=> setNovoNomeLista(e.target.value)} />
+        <input className='mb-1 pb-10' type={'text'} placeholder="Descrição" onChange={(e)=> setNovoDescricao(e.target.value)} />
+        <input className='bg-green-400 rounded p-1' type={'button'} value="Criar" onClick={()=>criaLista()} />
+        </section>
+        <section className='flex flex-col mt-1 w-full p-10'>
+          <div className='bg-red-300'>
 
-        <div>
-            <h5>Suas Listas</h5>
+            <h5 className='text-xl'>Suas Listas</h5>
             {/* aqui retorna um componente de listas cadastradas desse usuário
             , que deve conter um formulário de busca de filmes, e de inserir na Lista */}
-            {}
-        </div>        
+            {hasList? <Lista apiKey={apiKey} /> : <p>Voce ainda não tem nenhuma lista</p>}
+            </div>
+        </section>        
       </main>
 
       <footer className={styles.footer}>
