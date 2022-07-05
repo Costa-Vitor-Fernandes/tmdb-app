@@ -13,20 +13,21 @@ const Home: NextPage = () => {
   const [password, setPassword] = useState<string>("")
   const [apiKey, setApiKey] =  useState<string>("")
   const [requestToken, setRequestToken] = useState<string>("")
-  const [sessionId, setSessionId] = useState<string>('')
+
 
 
 
 
   const entrar = async () =>{
-    console.log('entrar', user, password, apiKey)
-    // alert('carregando')
-    // cria o resquest token
+
     async function criarRequestToken (){
-    await axios.get(`https://api.themoviedb.org/3/authentication/token/new?api_key=${apiKey}`).then((result:AxiosResponse)=>{
+    await axios.get(`https://api.themoviedb.org/3/authentication/token/new?api_key=${apiKey}`).then(async(result:AxiosResponse)=>{
         
         console.log(result.data.request_token.length, "req token length") //
-        setRequestToken(result.data.request_token)
+        if(result.data.request_token){
+          setRequestToken(result.data.request_token)
+          await login()
+        }
       })
     }
     async function login (){
@@ -48,21 +49,21 @@ const Home: NextPage = () => {
     await axios.get(`https://api.themoviedb.org/3/authentication/session/new?api_key=${apiKey}&request_token=${requestToken}`).then((res:AxiosResponse)=>{
         console.log(res.data, 'session id') //session id
         if(res.data.session_id){
-        setSessionId(res.data.session_id)
-        router.push({
-          pathname:'/dashboard',
-          query: {user:user,password:password,apiKey:apiKey,requestToken: requestToken,sessionId:sessionId}
-        })
+          console.log(res.data.session_id, 'this is the session id')
+        
+        setTimeout(()=>{
+
+          router.push({
+            pathname:'/dashboard',
+            query: {user:user,apiKey:apiKey,requestToken: requestToken,sessionId:res.data.session_id}
+          })
+
+        },200)
+        
         }
       })
     }
     await criarRequestToken()
-    await login()
-
-    // else{
-    //   alert('algo deu errado, tente novamente')
-    // }
-  // aqui a gente vai colocar o axios com as funcoes ja escritas pelo nossa camarada e usar as tipagens corretamente !
   }
 
   return (
