@@ -184,8 +184,9 @@ import type { NextPage, NextComponentType } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../../styles/Home.module.css'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter, withRouter } from 'next/router'
+import axios, { AxiosResponse } from 'axios'
 
 
 
@@ -199,10 +200,14 @@ const Dashboard: NextPage = () => {
     
     const [novoNomeLista, setNovoNomeLista] = useState<string>("")
     const [novoDescricao, setNovoDescricao] = useState<string>("")
-    const [listaId, setListaId] = useState<string>('')
+    const [listaId, setListaId] = useState<number>()
+
+    
 
     const router = useRouter()
     const user = router.query.user
+
+
     
     if(!user){
         return <div><h1>Voce Precisa Logar</h1></div>
@@ -212,7 +217,28 @@ const Dashboard: NextPage = () => {
   
     
 const criaLista = () =>{
-    console.log('crialista', novoNomeLista, novoDescricao, 'userlog', user)
+    console.log('crialista', router.query.sessionId, "session id")
+
+
+    if(!novoDescricao && !novoNomeLista){
+        return alert('Preencha os campos corretamente')
+    }
+    function postList () {
+        axios.post(`https://api.themoviedb.org/3/list?api_key=${router.query.apiKey}&session_id=${router.query.sessionId}`,{
+            name: novoNomeLista,
+            description: novoDescricao,
+            language: 'en',
+        }).then((res:AxiosResponse)=>{
+            if(!res.data.success){
+                return alert('algo deu errado')
+            }
+            else if (res.data.list_id){
+                console.log(res.data, 'resdata')
+                setListaId(res.data.list_id)
+            }
+        })
+    }
+    postList()
 }
 
     return (
@@ -227,7 +253,7 @@ const criaLista = () =>{
         <h1 className={styles.title}>
           Bem vindo {user}
         </h1>
-        <h3>Se voce nao tem nenhuma lista, voce deve começar criando uma ou fornecendo o id de uma lista já criada !</h3>
+        <h3>Crie agora sua primeira lista</h3>
         <input type={'text'} placeholder="Nome da sua lista" onChange={(e)=> setNovoNomeLista(e.target.value)} />
         <input type={'text'} placeholder="Descrição" onChange={(e)=> setNovoDescricao(e.target.value)} />
         <input type={'button'} value="Criar" onClick={()=>criaLista()} />
