@@ -96,7 +96,7 @@ interface ListaItemProps {
 
 interface ListaProps {
   apiKey: any;
-  listaId:any;
+  arrlistaId:any;
 }
 
 const PesquisaItem: React.FC<ListaItemProps> = (props: ListaItemProps) => {
@@ -161,10 +161,24 @@ const Lista: React.FC<ListaProps> = (props: ListaProps) => {
   const [procurando, setProcurando] = useState<boolean>(false);
   const [queryRes, setQueryRes] = useState<any>([]);
   const [indexLista, setIndexLista] = useState<number>(0)
+  
+  const [nomeDaLista, setNomeDaLista] = useState<string>("")
+  const [descricao, setDescricao] = useState<string>("")
+  const [itemsDaLista, setItemsDaLista] = useState<[]>()
 
-  let id = 10;
+  useEffect(()=>{
+    console.log(
+      props.arrlistaId[indexLista], 'props arrlistaid') // id da lista que tem que dar fetch
+      
+      axios.get(`https://api.themoviedb.org/3/list/${props.arrlistaId[indexLista]}?api_key=${props.apiKey}`).then((res)=>{
+      console.log(res, 'res do useEffect que fetcha a lista que ta selecionada')
+      })
 
-  const deleteLista = (id: number) => {
+
+  },[indexLista])
+
+
+  const deleteLista = () => {
     console.log("deleta lista");
   };
   // isso aqui deu bug no typescript
@@ -200,16 +214,15 @@ const Lista: React.FC<ListaProps> = (props: ListaProps) => {
       <div className='flex flex-row justify-around'>
         <input className=" bg-gray-300 hover:bg-gray-100 focus:bg-gray-100" type={'button'} value="<" onClick={()=>{
           if(indexLista  === 0){
-            setIndexLista(props.listaId.length -1)
-            
+            setIndexLista(props.arrlistaId.length -1)
           }
           else{
             setIndexLista(indexLista-1)
           }
         }} />
-      <h1>Lista id:{props.listaId[indexLista]}</h1>
+      <h1>Lista id:{props.arrlistaId[indexLista]}</h1>
       <input className=" bg-gray-300 hover:bg-gray-100 focus:bg-gray-100" type={'button'} value=">" onClick={()=>{
-          if(indexLista +1 === props.listaId.length){
+          if(indexLista +1 === props.arrlistaId.length){
             setIndexLista(0)
        
           }
@@ -218,13 +231,11 @@ const Lista: React.FC<ListaProps> = (props: ListaProps) => {
             
           }
         }}/>
-
-
       <input
         className="bg-red-500 rounded p-2 ml-5 hover:bg-red-300 focus:bg-red-300 pointer-events-auto"
         type={"button"}
         value="delete"
-        onClick={() => deleteLista(id)}
+        onClick={() => deleteLista()}
         />
         </div>
         
@@ -359,9 +370,8 @@ const Dashboard: NextPage = () => {
               {/* aqui retorna um componente de listas cadastradas desse usuário
             , que deve conter um formulário de busca de filmes, e de inserir na Lista */}
               
-              {/* esse aqui tem que fazer com map ou dar um jeito com botao */}
               {hasList ? (
-                <Lista listaId={arrListaId} apiKey={apiKey} />
+                <Lista arrlistaId={arrListaId} apiKey={apiKey} />
               ) : (
                 <p>Voce ainda não tem nenhuma lista</p>
               )}
