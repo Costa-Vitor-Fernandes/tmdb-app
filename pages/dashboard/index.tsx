@@ -1,79 +1,4 @@
-// Um desenvolvedor tentou criar um projeto que consome a base de dados de filme do TMDB para criar um organizador de filmes, mas desistiu
-// pois considerou o seu código inviável. Você consegue usar typescript para organizar esse código e a partir daí aprimorar o que foi feito?
-
-// A ideia dessa atividade é criar um aplicativo que:
-//    - Busca filmes
-//    - Apresenta uma lista com os resultados pesquisados
-//    - Permite a criação de listas de filmes e a posterior adição de filmes nela
-
-// Todas as requisições necessárias para as atividades acima já estão prontas, mas a implementação delas ficou pela metade (não vou dar tudo de graça).
-// Atenção para o listener do botão login-button que devolve o sessionID do usuário
-// É necessário fazer um cadastro no https://www.themoviedb.org/ e seguir a documentação do site para entender como gera uma API key https://developers.themoviedb.org/3/getting-started/introduction
-/*
-
-
-searchButton.addEventListener('click', async () => {
-  let lista = document.getElementById("lista");
-  if (lista) {
-    lista.outerHTML = "";
-  }
-  let query = document.getElementById('search').value;
-  let listaDeFilmes = await procurarFilme(query);
-  let ul = document.createElement('ul');
-  ul.id = "lista"
-  for (const item of listaDeFilmes.results) {
-    let li = document.createElement('li');
-    li.appendChild(document.createTextNode(item.original_title))
-    ul.appendChild(li)
-  }
-  console.log(listaDeFilmes);
-  searchContainer.appendChild(ul);
-})
-
-async function procurarFilme(query) {
-  query = encodeURI(query)
-  console.log(query)
-  let result = await HttpClient.get({
-    url: `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${query}`,
-    method: "GET"
-  })
-  return result
-}
-
-async function adicionarFilme(filmeId) {
-  let result = await HttpClient.get({
-    url: `https://api.themoviedb.org/3/movie/${filmeId}?api_key=${apiKey}&language=en-US`,
-    method: "GET"
-  })
-  console.log(result);
-}
-
-
-async function adicionarFilmeNaLista(filmeId, listaId) {
-  let result = await HttpClient.get({
-    url: `https://api.themoviedb.org/3/list/${listaId}/add_item?api_key=${apiKey}&session_id=${sessionId}`,
-    method: "POST",
-    body: {
-      media_id: filmeId
-    }
-  })
-  console.log(result);
-}
-
-async function pegarLista() {
-  let result = await HttpClient.get({
-    url: `https://api.themoviedb.org/3/list/${listId}?api_key=${apiKey}`,
-    method: "GET"
-  })
-  console.log(result);
-}
-
-5648df06ead43a7e9f9ec286c54d8f5f
-PNWT@cPahT!785M
-
-
-*/
-import type { NextPage, NextComponentType } from "next";
+import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import styles from "../../styles/Home.module.css";
@@ -82,122 +7,25 @@ import { useRouter, withRouter } from "next/router";
 import axios, { AxiosResponse } from "axios";
 
 interface ListaItemProps {
+  sessionId:any;
+  apiKey: any;
+  arrlistaId:any;
   queryRes: {
+    [index:number]:{
     original_title: string;
     id: number;
     overview: string;
-  };
+  },
+};
 }
 
 interface ListaProps {
   apiKey: any;
-  listaId:any;
+  arrlistaId:any;
+  sessionId:any;
 }
 
-const PesquisaItem: React.FC<ListaItemProps> = (props: ListaItemProps) => {
-  //falta colocar ternario pra esconder antes de pesquisar, com estado bool no componente pai
 
-  const adicionaFilme = () => {
-    console.log("adiciona filme", props.queryRes.original_title);
-  };
-
-  return (
-    <div className="flex flex-col bg-indigo-500 mt-2">
-      <h5 className="text-center text-xl py-3">Resultado</h5>
-      <div className="flex flex-row">
-        <p className="text-lg leading-3 py-3 pl-3">Titulo:</p>
-        <p className="text-md leading-3 py-3">
-          {props.queryRes.original_title}
-        </p>
-      </div>
-      <p className="text-sm pl-4">id:{props.queryRes.id}</p>
-      <p className="text-md pl-7 pr-3">overview: {props.queryRes.overview}</p>
-      <input
-        type={"button"}
-        className="bg-indigo-200 text-center rounded"
-        value="Adicionar na lista"
-        onClick={() => adicionaFilme()}
-      />
-    </div>
-  );
-};
-
-const Lista: React.FC<ListaProps> = (props: ListaProps) => {
-  // falta pegar os ids das listas do usuário com useEffect e axios
-  // add botao pra trocar de lista
-  // setar estado pra id da lista
-
-  const [novoFilme, setNovoFilme] = useState<string>("");
-  const [procurando, setProcurando] = useState<boolean>(false);
-  const [queryRes, setQueryRes] = useState<any>([]);
-
-  let id = 10;
-
-  const deleteLista = (id: number) => {
-    console.log("deleta lista");
-  };
-  // isso aqui deu bug no typescript
-  // const retornoDaPesquisa = queryRes.map((r:any)=><PesquisaItem idd={r.id} overview={r.overview} original_title={r.original_title} />)
-
-  const procuraFilme = () => {
-    function procurar() {
-      axios
-        .get(
-          `https://api.themoviedb.org/3/search/movie?api_key=${props.apiKey}&query=${novoFilme}`
-        )
-        .then((res) => {
-          if (res.data.total_results === 0) {
-            return alert("não tem nada aqui com esse titulo");
-          } else {
-            console.log(res.data.results);
-            setQueryRes(res.data.results);
-          }
-        });
-    }
-
-    if (novoFilme !== "") {
-      setProcurando(true)
-      procurar();
-    }
-    return;
-  };
-
-  return (
-    <div className="bg-indigo-100">
-      <div className='flex flex-row around'>
-      <h1>Lista id:{props.listaId}</h1>
-      <input
-        className="bg-red-500 rounded p-2 ml-5 hover:bg-red-300 focus:bg-red-300 pointer-events-auto"
-        type={"button"}
-        value="delete"
-        onClick={() => deleteLista(id)}
-        />
-        </div>
-      {/* isso aqui é um mockup pra um componente que ainda vai vir, que é o ItemDaLista, que vai ser feito no ternario */}
-      <p>Lorem, ipsum.</p>
-      <p>Lorem, ipsum.</p>
-      <p>Lorem, ipsum.</p>
-      <p>Lorem, ipsum.</p>
-      {/* isso aqui é um mockup pra um componente que ainda vai vir, que é o ItemDaLista */}
-      <div className="bg-red-200 pb-4 mt-2">
-        <p className="text-center pt-4">Adicione Mais Filmes !</p>
-        <input
-          type={"text"}
-          placeholder="Adicione um filme"
-          onChange={(e) => setNovoFilme(e.target.value)}
-        />
-        <input
-          className="bg-gray-100 rounded mx-2 px-2"
-          type={"button"}
-          value="procurar"
-          onClick={() => procuraFilme()}
-        />
-      </div>
-      {/* {retornoDaPesquisa? retornoDaPesquisa :null} */}
-     {procurando ? <PesquisaItem queryRes={queryRes} /> :null} 
-    </div>
-  );
-};
 
 const Dashboard: NextPage = () => {
   const [novoNomeLista, setNovoNomeLista] = useState<string>("");
@@ -226,13 +54,10 @@ const Dashboard: NextPage = () => {
           setHasList(true);
           setArrListaId(res.data.results.map((r: any) => r.id));
         }
-        console.log(
-          res.data.results.map((r: any) => r.id),
-          "res do useEff"
-        );
+
       });
   }, []);
-
+// protege contra quem nao logou
   if (!user) {
     return (
       <div>
@@ -241,7 +66,7 @@ const Dashboard: NextPage = () => {
     );
   } else {
     const criaLista = () => {
-      console.log("crialista", router.query.sessionId, "session id");
+
       if (!novoDescricao || !novoNomeLista) {
         return alert("Preencha os campos corretamente");
       }
@@ -260,7 +85,6 @@ const Dashboard: NextPage = () => {
             if (!res.data.success) {
               return alert("algo deu errado");
             } else if (res.data.list_id) {
-              console.log(res.data, "resdata");
             }
           });
       }
@@ -277,7 +101,7 @@ const Dashboard: NextPage = () => {
 
         <main className="flex flex-col items-center">
           <h1 className="flex text-5xl p-10 ">Bem vindo {user}</h1>
-          <section className="flex flex-col p-10 bg-indigo-100">
+          <section className="flex flex-col p-10 bg-indigo-100 sm:w-[90vw] sm:mx-20 ">
             <h3 className="text-2xl">Crie uma lista</h3>
             <input
               className="mb-1"
@@ -292,21 +116,20 @@ const Dashboard: NextPage = () => {
               onChange={(e) => setNovoDescricao(e.target.value)}
             />
             <input
-              className="bg-green-400 rounded p-1"
+              className="bg-gray-100 hover:bg-green-500 rounded p-1"
               type={"button"}
               value="Criar"
               onClick={() => criaLista()}
             />
           </section>
-          <section className="flex flex-col mt-1 w-full p-10">
-            <div className="bg-red-300">
-              <h5 className="text-xl">Suas Listas</h5>
+          <section className="flex flex-col mt-1 sm:w-[90vw] sm:mx-20 p-10 sm:pt-5 sm:p-0">
+            <div className="w-full">
+              <h5 className="text-2xl text-center sm:text-5xl sm:pb-4">Suas Listas</h5>
               {/* aqui retorna um componente de listas cadastradas desse usuário
             , que deve conter um formulário de busca de filmes, e de inserir na Lista */}
               
-              {/* esse aqui tem que fazer com map ou dar um jeito com botao */}
               {hasList ? (
-                <Lista listaId={arrListaId} apiKey={apiKey} />
+                <Lista arrlistaId={arrListaId} apiKey={apiKey} sessionId={sessionId}/>
               ) : (
                 <p>Voce ainda não tem nenhuma lista</p>
               )}
@@ -322,18 +145,206 @@ const Dashboard: NextPage = () => {
           >
             Powered by{" "}
             <span className={styles.logo}>
-              <Image
-                src="/vercel.svg"
-                alt="Vercel Logo"
-                width={72}
-                height={16}
-              />
+            <Image src="/blue_short-8e7b30f73a4020692ccca9c88bafe5dcb6f8a62a4c6bc55cd9ba82bb2cd95f6c.svg" alt="Vercel Logo" width={72} height={16} />
             </span>
           </a>
         </footer>
       </div>
     );
   }
+};
+
+
+const Lista: React.FC<ListaProps> = (props: ListaProps) => {
+  // falta pegar os ids das listas do usuário com useEffect e axios
+  // add botao pra trocar de lista
+  // setar estado pra id da lista
+
+  const [indexLista, setIndexLista] = useState<number>(0)
+  const [nomeDaLista, setNomeDaLista] = useState<string>("")
+  const [descricao, setDescricao] = useState<string>("")
+  const [itemsDaLista, setItemsDaLista] = useState<[]>()
+  const [procurando, setProcurando] = useState<boolean>(false);
+  const [novoFilme, setNovoFilme] = useState<string>("");
+  const [queryRes, setQueryRes] = useState<any>([]);
+
+  useEffect(()=>{
+      
+      axios.get(`https://api.themoviedb.org/3/list/${props.arrlistaId[indexLista]}?api_key=${props.apiKey}`).then((res)=>{
+      setNomeDaLista(res.data.name)
+      setDescricao(res.data.description)
+      setItemsDaLista(res.data.items)
+      })
+
+
+  },[indexLista])
+
+  interface ItemsDaLista{
+    [index:number]:{
+      original_title:string;
+    }
+  }
+  const FilmesListaSelecionada = () =>{
+    if(itemsDaLista){ 
+      const titulosInclusosNessaLista = itemsDaLista.map((e,i,arr:ItemsDaLista)=>{
+        return <p>{i+1}-{arr[i].original_title}</p>
+      })
+      return titulosInclusosNessaLista
+    }else
+    return <p>Essa lista existe, mas não tem nenhum filme ainda</p>
+}
+
+
+  const deleteLista = () => {
+    console.log("deleta lista", props.arrlistaId[indexLista]);
+  };
+
+
+  const procuraFilme = () => {
+    function procurar() {
+      axios
+        .get(
+          `https://api.themoviedb.org/3/search/movie?api_key=${props.apiKey}&query=${novoFilme}`
+        )
+        .then((res) => {
+          if (res.data.total_results === 0) {
+            return alert("não tem nada aqui com esse titulo");
+          } else {
+         
+            setQueryRes(res.data.results);
+            setProcurando(true)
+          }
+        });
+    }
+
+    // protege contra o campo estar vazio
+    if (novoFilme !== "") {
+      procurar();
+    }
+    else return alert('preencha o campo corretamente')
+    // return;
+  };
+
+  return (
+    <section className="bg-indigo-100 ">
+      <div className='flex flex-row justify-around'>
+        <input className=" bg-gray-300 hover:bg-gray-100 focus:bg-gray-100" type={'button'} value="<" onClick={()=>{
+          if(indexLista  === 0){
+            setIndexLista(props.arrlistaId.length -1)
+          }
+          else{
+            setIndexLista(indexLista-1)
+          }
+        }} />
+      <h1>Lista id:{props.arrlistaId[indexLista]}</h1>
+      <input className=" bg-gray-300 hover:bg-gray-100 focus:bg-gray-100" type={'button'} value=">" onClick={()=>{
+          if(indexLista +1 === props.arrlistaId.length){
+            setIndexLista(0)
+       
+          }
+          else{
+            setIndexLista(indexLista+1)
+            
+          }
+        }}/>
+      <input
+        className="bg-red-500 rounded p-2 ml-5 hover:bg-red-300 focus:bg-red-300 pointer-events-auto"
+        type={"button"}
+        value="delete"
+        onClick={() => deleteLista()}
+        />
+        </div>
+        
+     <div className="pl-2">
+
+      <p className="text-2xl">Nome:{nomeDaLista}</p>
+      <p>Descrição:{descricao}</p>
+      <p>Filmes Nesta lista:</p>
+      {FilmesListaSelecionada()}
+      {itemsDaLista?<p className="text-[1%]">quantidade de filmes nessa lista: {itemsDaLista.length}</p> :null}
+     </div>
+      
+      {/* isso aqui é um mockup pra um componente que ainda vai vir, que é o ItemDaLista */}
+      <div className="flex flex-col justify-center text-center bg-indigo-300 pb-4 px-2 mt-2">
+        <div className="flex-row ">
+
+
+        <p className="pt-4 text-3xl">Adicione Mais Filmes !</p>
+        <input
+        className="mt-4"
+          type={"text"}
+          placeholder="Adicione um filme"
+          onChange={(e) => setNovoFilme(e.target.value)}
+          />
+        <input
+          className="bg-gray-100 hover:bg-indigo-400 rounded mx-2 px-2"
+          type={"button"}
+          value="Procurar"
+          onClick={() => procuraFilme()}
+          />
+          </div>
+          
+      </div>
+      {/* {retornoDaPesquisa? retornoDaPesquisa :null} */}
+     {procurando ? <PesquisaItem arrlistaId={props.arrlistaId[indexLista]} sessionId={props.sessionId} apiKey={props.apiKey} queryRes={queryRes} /> :null} 
+    </section>
+  );
+};
+
+
+const PesquisaItem: React.FC<ListaItemProps> = (props: ListaItemProps) => {
+
+
+  const [indexPesquisa, setIndexPesquisa] = useState<number>(0)
+
+  const indexLength = Object.values(props.queryRes).length
+
+
+
+  const adicionaFilme = () => {
+    axios.post(`https://api.themoviedb.org/3/list/${props.arrlistaId}/add_item?api_key=${props.apiKey}&session_id=${props.sessionId}`,{
+      media_id:props.queryRes[indexPesquisa].id
+    })
+  };
+
+  return (
+    <div className="flex flex-col bg-indigo-500 mt-2 mb-10">
+       <div className='flex flex-row justify-around'>
+     
+     <input className=" bg-gray-300 hover:bg-gray-100 focus:bg-gray-100" type={'button'} value="<" onClick={()=>{
+       if(indexPesquisa  === 0){ 
+         setIndexPesquisa(indexLength -1)
+       }
+       else{
+         setIndexPesquisa(indexPesquisa-1)
+       }
+     }} />
+   <h1 className="text-2xl mb-2">Resultado</h1>
+   <input className=" bg-gray-300 hover:bg-gray-100 focus:bg-gray-100" type={'button'} value=">" onClick={()=>{
+       if(indexPesquisa +1 === indexLength){
+         setIndexPesquisa(0)
+                 }
+       else{
+         setIndexPesquisa(indexPesquisa+1)
+       }
+     }}/>
+     </div>
+      <div className="flex flex-row">
+        <p className="text-lg leading-3 py-3 pl-3">Titulo:</p>
+        <p className="text-md leading-3 py-3">
+          {props.queryRes[indexPesquisa].original_title}
+        </p>
+      </div>
+      <p className="text-sm pl-4">id:{props.queryRes[indexPesquisa].id}</p>
+      <p className="text-md pl-7 pr-3">overview: {props.queryRes[indexPesquisa].overview}</p>
+      <input
+        type={"button"}
+        className="bg-gray-100 hover:bg-green-500 text-center rounded w-40 self-center mb-4"
+        value="Adicionar na lista"
+        onClick={() => adicionaFilme()}
+      />
+    </div>
+  );
 };
 
 export default withRouter(Dashboard);
