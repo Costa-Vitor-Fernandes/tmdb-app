@@ -85,7 +85,7 @@ const Home: NextPage = () => {
           <input className='flex justify-center my-1 pl-1' type={"text"} placeholder="user" onChange={(e)=> setUser(e.target.value)} />
           <input className='flex justify-center my-1 pl-1' type={"password"} placeholder="password" onChange={(e)=> setPassword(e.target.value)} />
           <input className='flex justify-center my-1 pl-1' type={"text"} placeholder="apiKey" onChange={(e)=> setApiKey(e.target.value)} />  
-          <input className='flex justify-center my-1 py-1  bg-indigo-400 rounded' type={"button"} value="entrar" onClick={()=>entrar()} />
+          <input className='flex justify-center my-1 py-1  bg-indigo-400 rounded hover:bg-indigo-200' type={"button"} value="entrar" onClick={()=>entrar()} />
           <p className='flex pt-4'>powered by TMDB api</p>
         </div>
         </div>
