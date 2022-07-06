@@ -82,13 +82,16 @@ import { useRouter, withRouter } from "next/router";
 import axios, { AxiosResponse } from "axios";
 
 interface ListaItemProps {
-
+  sessionId:any;
+  apiKey: any;
+  arrlistaId:any;
   queryRes: {
     [index:number]:{
     original_title: string;
     id: number;
     overview: string;
-  }
+  },
+
 };
 
 
@@ -97,6 +100,7 @@ interface ListaItemProps {
 interface ListaProps {
   apiKey: any;
   arrlistaId:any;
+  sessionId:any;
 }
 
 const PesquisaItem: React.FC<ListaItemProps> = (props: ListaItemProps) => {
@@ -109,7 +113,12 @@ const PesquisaItem: React.FC<ListaItemProps> = (props: ListaItemProps) => {
 
 
   const adicionaFilme = () => {
-    console.log("adiciona filme", props.queryRes[indexPesquisa].original_title);
+    console.log("adiciona filme", props.queryRes[indexPesquisa].original_title, 'de id', props.queryRes[indexPesquisa].id, 'api key ->', props.apiKey, 'sessionId->', props.sessionId);
+    axios.post(`https://api.themoviedb.org/3/list/${props.arrlistaId}/add_item?api_key=${props.apiKey}&session_id=${props.sessionId}`,{
+      media_id:props.queryRes[indexPesquisa].id
+    }).then((res)=>{
+      console.log(res)
+    })
   };
 
   return (
@@ -161,7 +170,7 @@ const Lista: React.FC<ListaProps> = (props: ListaProps) => {
   const [procurando, setProcurando] = useState<boolean>(false);
   const [queryRes, setQueryRes] = useState<any>([]);
   const [indexLista, setIndexLista] = useState<number>(0)
-  
+
   const [nomeDaLista, setNomeDaLista] = useState<string>("")
   const [descricao, setDescricao] = useState<string>("")
   const [itemsDaLista, setItemsDaLista] = useState<[]>()
@@ -172,11 +181,34 @@ const Lista: React.FC<ListaProps> = (props: ListaProps) => {
       
       axios.get(`https://api.themoviedb.org/3/list/${props.arrlistaId[indexLista]}?api_key=${props.apiKey}`).then((res)=>{
       console.log(res, 'res do useEffect que fetcha a lista que ta selecionada')
+      setNomeDaLista(res.data.name)
+      setDescricao(res.data.description)
+      setItemsDaLista(res.data.items)
       })
 
 
   },[indexLista])
+  //funcao?
 
+  interface ItemsDaLista{
+    [index:number]:{
+      original_title:string;
+    }
+  }
+
+  const FilmesDessaLista = () =>{
+
+    
+    if(itemsDaLista){
+      
+      const titulosInclusosNessaLista = itemsDaLista.map((e,i,arr:ItemsDaLista)=>{
+        return <p>{i+1}-{arr[i].original_title}</p>
+      })
+      return titulosInclusosNessaLista
+    }else
+    return <p>Essa lista existe, mas não tem nenhum filme ainda</p>
+  }
+//funcao?
 
   const deleteLista = () => {
     console.log("deleta lista");
@@ -240,10 +272,14 @@ const Lista: React.FC<ListaProps> = (props: ListaProps) => {
         </div>
         
       {/* isso aqui é um mockup pra um componente que ainda vai vir, que é o ItemDaLista, que vai ser feito no ternario */}
-      <p>Lorem, ipsum.</p>
-      <p>Lorem, ipsum.</p>
-      <p>Lorem, ipsum.</p>
-      <p>Lorem, ipsum.</p>
+      <p>Nome:{nomeDaLista}</p>
+      <p>Descrição:{descricao}</p>
+      {/* .map nos items da lista */}
+      <p></p>
+      <p>Filmes Nesta lista:</p>
+      {FilmesDessaLista()}
+      {itemsDaLista?<p className="text-sm">quantidade de filmes nessa lista: {itemsDaLista.length}</p> :null}
+      
       {/* isso aqui é um mockup pra um componente que ainda vai vir, que é o ItemDaLista */}
       <div className="bg-red-200 pb-4 mt-2">
         <p className="text-center pt-4">Adicione Mais Filmes !</p>
@@ -260,7 +296,7 @@ const Lista: React.FC<ListaProps> = (props: ListaProps) => {
         />
       </div>
       {/* {retornoDaPesquisa? retornoDaPesquisa :null} */}
-     {procurando ? <PesquisaItem queryRes={queryRes} /> :null} 
+     {procurando ? <PesquisaItem arrlistaId={props.arrlistaId[indexLista]} sessionId={props.sessionId} apiKey={props.apiKey} queryRes={queryRes} /> :null} 
     </div>
   );
 };
@@ -371,7 +407,7 @@ const Dashboard: NextPage = () => {
             , que deve conter um formulário de busca de filmes, e de inserir na Lista */}
               
               {hasList ? (
-                <Lista arrlistaId={arrListaId} apiKey={apiKey} />
+                <Lista arrlistaId={arrListaId} apiKey={apiKey} sessionId={sessionId}/>
               ) : (
                 <p>Voce ainda não tem nenhuma lista</p>
               )}
