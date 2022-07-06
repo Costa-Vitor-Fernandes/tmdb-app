@@ -9,21 +9,19 @@ import axios, { AxiosResponse } from 'axios'
 const Home: NextPage = () => {
   const router = useRouter()
 
+  //estados
   const [user,setUser] = useState<string>("")
   const [password, setPassword] = useState<string>("")
   const [apiKey, setApiKey] =  useState<string>("")
   const [requestToken, setRequestToken] = useState<string>("")
 
-
-
-
-
+//funções
   const entrar = async () =>{
-
+   return await criarRequestToken()
     async function criarRequestToken (){
     await axios.get(`https://api.themoviedb.org/3/authentication/token/new?api_key=${apiKey}`).then(async(result:AxiosResponse)=>{
         
-        console.log(result.data.request_token.length, "req token length") //
+      
         if(result.data.request_token){
           setRequestToken(result.data.request_token)
           await login()
@@ -31,25 +29,27 @@ const Home: NextPage = () => {
       })
     }
     async function login (){
-      
 
-    await axios.post(`https://api.themoviedb.org/3/authentication/token/validate_with_login?api_key=${apiKey}`,{
+      if(requestToken !==""){
+        
+        await axios.post(`https://api.themoviedb.org/3/authentication/token/validate_with_login?api_key=${apiKey}`,{
         username: `${user}`,
         password: `${password}`,
         request_token: `${requestToken}`
       }).then(async(res:AxiosResponse)=>{
-        console.log(res.data.success, 'login')
+        
         if(res.data.success){
           await criaSessao()
         }
       })
     }
+    }
     async function criaSessao (){
       // cria sessão
     await axios.get(`https://api.themoviedb.org/3/authentication/session/new?api_key=${apiKey}&request_token=${requestToken}`).then((res:AxiosResponse)=>{
-        console.log(res.data, 'session id') //session id
+        
         if(res.data.session_id){
-          console.log(res.data.session_id, 'this is the session id')
+          
         
         setTimeout(()=>{
 
@@ -63,7 +63,6 @@ const Home: NextPage = () => {
         }
       })
     }
-    await criarRequestToken()
   }
 
   return (
@@ -101,7 +100,7 @@ const Home: NextPage = () => {
         >
           Powered by{' '}
           <span className={styles.logo}>
-            <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
+          <Image src="/blue_short-8e7b30f73a4020692ccca9c88bafe5dcb6f8a62a4c6bc55cd9ba82bb2cd95f6c.svg" alt="Vercel Logo" width={72} height={16} />
           </span>
         </a>
       </footer>
