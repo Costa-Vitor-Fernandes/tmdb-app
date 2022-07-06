@@ -82,11 +82,16 @@ import { useRouter, withRouter } from "next/router";
 import axios, { AxiosResponse } from "axios";
 
 interface ListaItemProps {
+
   queryRes: {
+    [index:number]:{
     original_title: string;
     id: number;
     overview: string;
-  };
+  }
+};
+
+
 }
 
 interface ListaProps {
@@ -97,21 +102,46 @@ interface ListaProps {
 const PesquisaItem: React.FC<ListaItemProps> = (props: ListaItemProps) => {
   //falta colocar ternario pra esconder antes de pesquisar, com estado bool no componente pai
 
+  const [indexPesquisa, setIndexPesquisa] = useState<number>(0)
+
+  const indexLength = Object.values(props.queryRes).length
+
+
+
   const adicionaFilme = () => {
-    console.log("adiciona filme", props.queryRes.original_title);
+    console.log("adiciona filme", props.queryRes[indexPesquisa].original_title);
   };
 
   return (
     <div className="flex flex-col bg-indigo-500 mt-2">
-      <h5 className="text-center text-xl py-3">Resultado</h5>
+       <div className='flex flex-row justify-around'>
+     
+     <input className=" bg-gray-300 hover:bg-gray-100 focus:bg-gray-100" type={'button'} value="<" onClick={()=>{
+       if(indexPesquisa  === 0){ 
+         setIndexPesquisa(indexLength -1)
+       }
+       else{
+         setIndexPesquisa(indexPesquisa-1)
+       }
+     }} />
+   <h1>Resultado</h1>
+   <input className=" bg-gray-300 hover:bg-gray-100 focus:bg-gray-100" type={'button'} value=">" onClick={()=>{
+       if(indexPesquisa +1 === indexLength){
+         setIndexPesquisa(0)
+                 }
+       else{
+         setIndexPesquisa(indexPesquisa+1)
+       }
+     }}/>
+     </div>
       <div className="flex flex-row">
         <p className="text-lg leading-3 py-3 pl-3">Titulo:</p>
         <p className="text-md leading-3 py-3">
-          {props.queryRes.original_title}
+          {props.queryRes[indexPesquisa].original_title}
         </p>
       </div>
-      <p className="text-sm pl-4">id:{props.queryRes.id}</p>
-      <p className="text-md pl-7 pr-3">overview: {props.queryRes.overview}</p>
+      <p className="text-sm pl-4">id:{props.queryRes[indexPesquisa].id}</p>
+      <p className="text-md pl-7 pr-3">overview: {props.queryRes[indexPesquisa].overview}</p>
       <input
         type={"button"}
         className="bg-indigo-200 text-center rounded"
@@ -130,6 +160,7 @@ const Lista: React.FC<ListaProps> = (props: ListaProps) => {
   const [novoFilme, setNovoFilme] = useState<string>("");
   const [procurando, setProcurando] = useState<boolean>(false);
   const [queryRes, setQueryRes] = useState<any>([]);
+  const [indexLista, setIndexLista] = useState<number>(0)
 
   let id = 10;
 
@@ -151,21 +182,44 @@ const Lista: React.FC<ListaProps> = (props: ListaProps) => {
           } else {
             console.log(res.data.results);
             setQueryRes(res.data.results);
+            setProcurando(true)
           }
         });
     }
 
     if (novoFilme !== "") {
-      setProcurando(true)
       procurar();
     }
-    return;
+    // return;
   };
 
   return (
     <div className="bg-indigo-100">
-      <div className='flex flex-row around'>
-      <h1>Lista id:{props.listaId}</h1>
+
+
+      <div className='flex flex-row justify-around'>
+        <input className=" bg-gray-300 hover:bg-gray-100 focus:bg-gray-100" type={'button'} value="<" onClick={()=>{
+          if(indexLista  === 0){
+            setIndexLista(props.listaId.length -1)
+            
+          }
+          else{
+            setIndexLista(indexLista-1)
+          }
+        }} />
+      <h1>Lista id:{props.listaId[indexLista]}</h1>
+      <input className=" bg-gray-300 hover:bg-gray-100 focus:bg-gray-100" type={'button'} value=">" onClick={()=>{
+          if(indexLista +1 === props.listaId.length){
+            setIndexLista(0)
+       
+          }
+          else{
+            setIndexLista(indexLista+1)
+            
+          }
+        }}/>
+
+
       <input
         className="bg-red-500 rounded p-2 ml-5 hover:bg-red-300 focus:bg-red-300 pointer-events-auto"
         type={"button"}
@@ -173,6 +227,7 @@ const Lista: React.FC<ListaProps> = (props: ListaProps) => {
         onClick={() => deleteLista(id)}
         />
         </div>
+        
       {/* isso aqui é um mockup pra um componente que ainda vai vir, que é o ItemDaLista, que vai ser feito no ternario */}
       <p>Lorem, ipsum.</p>
       <p>Lorem, ipsum.</p>
