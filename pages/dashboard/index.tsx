@@ -39,9 +39,8 @@ const Dashboard: NextPage = () => {
   const sessionId = router.query.sessionId;
 
   useEffect(() => {
-    axios
-      .get(
-        `https://api.themoviedb.org/3/account/{account_id}/lists?api_key=${apiKey}&language=en-US`,
+    // ve se o usuário que logou tem alguma lista, se sim, mostra a primeira e permite mudar de lista nos botoes
+    axios.get(`https://api.themoviedb.org/3/account/{account_id}/lists?api_key=${apiKey}&language=en-US`,
         {
           params: {
             api_key: apiKey,
@@ -124,15 +123,8 @@ const Dashboard: NextPage = () => {
           </section>
           <section className="flex flex-col mt-1 sm:w-[90vw] sm:mx-20 p-10 sm:pt-5 sm:p-0">
             <div className="w-full">
-              <h5 className="text-2xl text-center sm:text-5xl sm:pb-4">Suas Listas</h5>
-              {/* aqui retorna um componente de listas cadastradas desse usuário
-            , que deve conter um formulário de busca de filmes, e de inserir na Lista */}
-              
-              {hasList ? (
-                <Lista arrlistaId={arrListaId} apiKey={apiKey} sessionId={sessionId}/>
-              ) : (
-                <p>Voce ainda não tem nenhuma lista</p>
-              )}
+              <h5 className="text-2xl text-center sm:text-5xl sm:pb-4">Suas Listas</h5>             
+              {hasList ? (<Lista arrlistaId={arrListaId} apiKey={apiKey} sessionId={sessionId}/>) : (<p>Voce ainda não tem nenhuma lista</p>)}
             </div>
           </section>
         </main>
@@ -169,7 +161,7 @@ const Lista: React.FC<ListaProps> = (props: ListaProps) => {
   const [queryRes, setQueryRes] = useState<any>([]);
 
   useEffect(()=>{
-      
+      // pega nome descricao e items da lista
       axios.get(`https://api.themoviedb.org/3/list/${props.arrlistaId[indexLista]}?api_key=${props.apiKey}`).then((res)=>{
       setNomeDaLista(res.data.name)
       setDescricao(res.data.description)
@@ -184,19 +176,9 @@ const Lista: React.FC<ListaProps> = (props: ListaProps) => {
       original_title:string;
     }
   }
-  const FilmesListaSelecionada = () =>{
-    if(itemsDaLista){ 
-      const titulosInclusosNessaLista = itemsDaLista.map((e,i,arr:ItemsDaLista)=>{
-        return <p>{i+1}-{arr[i].original_title}</p>
-      })
-      return titulosInclusosNessaLista
-    }else
-    return <p>Essa lista existe, mas não tem nenhum filme ainda</p>
-}
-
 
   const deleteLista = () => {
-    console.log("deleta lista", props.arrlistaId[indexLista]);
+    console.log("deleta lista", props.arrlistaId[indexLista], 'isso é apenas um log e não foi implementado');
   };
 
 
@@ -224,6 +206,16 @@ const Lista: React.FC<ListaProps> = (props: ListaProps) => {
     else return alert('preencha o campo corretamente')
     // return;
   };
+
+  const FilmesListaSelecionada = () =>{
+    if(itemsDaLista){ 
+      const titulosInclusosNessaLista = itemsDaLista.map((e,i,arr:ItemsDaLista)=>{
+        return <p>{i+1}-{arr[i].original_title}</p>
+      })
+      return titulosInclusosNessaLista
+    }else
+    return <p>Essa lista existe, mas não tem nenhum filme ainda</p>
+}
 
   return (
     <section className="bg-indigo-100 ">
@@ -261,7 +253,7 @@ const Lista: React.FC<ListaProps> = (props: ListaProps) => {
       <p>Descrição:{descricao}</p>
       <p>Filmes Nesta lista:</p>
       {FilmesListaSelecionada()}
-      {itemsDaLista?<p className="text-[1%]">quantidade de filmes nessa lista: {itemsDaLista.length}</p> :null}
+      {itemsDaLista?<p className="text-[2%]">quantidade de filmes nessa lista: {itemsDaLista.length}</p> :null}
      </div>
       
       {/* isso aqui é um mockup pra um componente que ainda vai vir, que é o ItemDaLista */}
@@ -269,7 +261,7 @@ const Lista: React.FC<ListaProps> = (props: ListaProps) => {
         <div className="flex-row ">
 
 
-        <p className="pt-4 text-3xl">Adicione Mais Filmes !</p>
+        <p className="pt-4 text-3xl">Adicione Filmes !</p>
         <input
         className="mt-4"
           type={"text"}
