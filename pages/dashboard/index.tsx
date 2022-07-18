@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useRouter, withRouter } from "next/router";
 import axios, { AxiosResponse } from "axios";
 
+
 interface ListaItemProps {
   sessionId:any;
   apiKey: any;
@@ -15,6 +16,7 @@ interface ListaItemProps {
     original_title: string;
     id: number;
     overview: string;
+    poster_path:  string;
   },
 };
 }
@@ -174,6 +176,7 @@ const Lista: React.FC<ListaProps> = (props: ListaProps) => {
   interface ItemsDaLista{
     [index:number]:{
       original_title:string;
+      poster_path:string;
     }
   }
 
@@ -209,8 +212,11 @@ const Lista: React.FC<ListaProps> = (props: ListaProps) => {
 
   const FilmesListaSelecionada = () =>{
     if(itemsDaLista){ 
+      console.log(itemsDaLista)
       const titulosInclusosNessaLista = itemsDaLista.map((e,i,arr:ItemsDaLista)=>{
-        return <p>{i+1}-{arr[i].original_title}</p>
+      return <p>{i+1}-{arr[i].original_title}
+      <div className="flex w-10 h-16 relative"><Image layout="fill" src={`https://image.tmdb.org/t/p/original${arr[i].poster_path}`}></Image></div>
+      </p>
       })
       return titulosInclusosNessaLista
     }else
@@ -327,6 +333,7 @@ const PesquisaItem: React.FC<ListaItemProps> = (props: ListaItemProps) => {
           {props.queryRes[indexPesquisa].original_title}
         </p>
       </div>
+      <div className="flex justify-center self-center w-24 h-36 relative"><Image layout="fill" src={`https://image.tmdb.org/t/p/original${props.queryRes[indexPesquisa].poster_path}`}></Image></div>
       <p className="text-sm pl-4">id:{props.queryRes[indexPesquisa].id}</p>
       <p className="text-md pl-7 pr-3">overview: {props.queryRes[indexPesquisa].overview}</p>
       <input
